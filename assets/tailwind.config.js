@@ -15,6 +15,9 @@ module.exports = {
         brand: "#FD4F00",
       }
     },
+    FontFamily: {
+      SpaceMono: ["Space Mono", "monospace"],
+    },
   },
   plugins: [
     require("@tailwindcss/forms"),

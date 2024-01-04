@@ -1,4 +1,4 @@
-defmodule GithubUserSearchAppWeb.IconComponent do
+defmodule GithubUserSearchAppWeb.CustomComponent do
   use GithubUserSearchAppWeb, :html
 
   def location_icon(assigns) do
@@ -63,22 +63,24 @@ defmodule GithubUserSearchAppWeb.IconComponent do
 
   def search_form(assigns) do
     ~H"""
-    <div>
-      <.simple_form id="user-form" for={@form} phx-submit="search_user">
-        <input
-          type="text"
-          placeholder="Search Github Username"
-          autocomplete="off"
-          field={@form[:username]}
-        />
+    <div class="mx-6">
+      <.simple_form for={@form} phx-change="validate" phx-submit="search_dev" id="search_form">
+        <.input field={@form[:username]} label="username" phx-debounce="blur" />
 
-        <.button
-          phx-disable-with="Searching ..."
-          class="float-right relative -translate-y-10 -translate-x-2"
-        >
-          Search
-        </.button>
+        <.button class="float-right relative -top-16 ">Search</.button>
       </.simple_form>
+    </div>
+    """
+  end
+
+  attr :stats_description, :string, required: true
+  attr :stats, :integer, required: true
+
+  def stats(assigns) do
+    ~H"""
+    <div class="flex flex-col ">
+      <p class="text-xs"><%= @stats_description %></p>
+      <span class="font-bold"><%= @stats %></span>
     </div>
     """
   end

@@ -9,8 +9,8 @@ defmodule GithubUserSearchApp.Profile.ProfileApi do
       {:ok, %Finch.Response{status: status, body: body}} ->
         handle_response(body, status)
 
-      {:error, request_fail} ->
-        IO.inspect(request_fail, label: "request error")
+      {:error, reason} ->
+        IO.inspect(reason, label: "request error")
     end
   end
 
