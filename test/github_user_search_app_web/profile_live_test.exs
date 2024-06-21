@@ -13,8 +13,8 @@ defmodule GithubUserSearchAppWeb.ProfileLiveTest do
   #   avatar_url = "https://avatars.githubusercontent.com/u/1234567?v=4"
   #   {:ok, view, _html} = live(conn, ~p"/profile")
 
-  #   avatar = element(view, "img[src*=\"#{avatar_url}\"]")
-  #   assert has_element?(avatar)
+  #   avatar = view |> element("img[src=\"#{avatar_url}\"]") |> render()
+  #   assert has_element?(view, avatar)
   # end
 
   test "user can submit form", %{conn: conn} do
@@ -26,12 +26,12 @@ defmodule GithubUserSearchAppWeb.ProfileLiveTest do
 
     assert has_element?(view, data - role = "profile", username: "ngumokenneth")
 
-    # html =
-    #   view
-    #   |> form("#search_form", %{profile_changeset: %{username: "ngumokenneth"}})
-    #   |> render_submit()
+    html =
+      view
+      |> form("#search_form", %{profile_changeset: %{username: "ngumokenneth"}})
+      |> render_submit()
 
-    # assert html =~ "ngumokenneth"
+    assert html =~ "ngumokenneth"
   end
 
   test "validates user input", %{conn: conn} do

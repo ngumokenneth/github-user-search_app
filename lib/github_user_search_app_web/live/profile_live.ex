@@ -3,26 +3,25 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
   alias GithubUserSearchApp.Profile.ProfileApi
   alias GithubUserSearchAppWeb.CustomComponent
   alias GithubUserSearchApp.Profile.ProfileChangeset
-
-  def mount(_params, _session, socket) do
-    # profile = ProfileApi.fetch("ngumokenneth")
-    profile = ProfileApi.data()
-
-    {
-      :ok,
-      socket
-      |> assign_user()
-      |> clear_form()
-      |> assign(profile: ProfileApi.fetch("ngumokenneth"))
-      |> assign(profile: profile)
-    }
-  end
+  alias Phoenix.LiveView.JS
 
   def render(assigns) do
     ~H"""
-    <div class=" text-white py-10 font-SpaceMono">
-      <div class="mx-6">
-        <h1>devfinder</h1>
+    <div class="mx-auto text-white font-SpaceMono md:max-w-lg md:px-8 ">
+      <div class="flex justify-between py-2">
+        <h1 class="font-bold text-[#222731] dark:text-[#FFFFFF]">devfinder</h1>
+        <button phx-click={toggle_dark_mode()} class="flex items-center gap-3 ">
+          <div id="light-mode" class="flex gap-2 text-[#FFFFFF]">
+            <span>light</span>
+            <CustomComponent.sun_icon />
+          </div>
+          <div id="dark-mode" class="hidden ">
+            <div class="flex gap-2 text-[#4B6A9B]">
+              <span>dark</span>
+              <CustomComponent.moon_icon />
+            </div>
+          </div>
+        </button>
       </div>
 
       <CustomComponent.search_form form={@form} />
@@ -34,24 +33,24 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
 
   def profile(assigns) do
     ~H"""
-    <div class="font-SpaceMono">
-      <div class="flex py-6 px-10 mx-6 my-8 rounded-sm bg-[#1E2A47] ">
-        <div>
-          <img src={@profile["avatar_url"]} alt="" class="rounded-full w-24" />
-        </div>
-        <div class="ml-6">
-          <div class="flex justify-between">
+    <div class="font-SpaceMono bg-[#FEFEFE] dark:bg-[#1E2A47]">
+      <div class="p-6 rounded-lg">
+        <div class="flex">
+          <img src={@profile["avatar_url"]} alt={@profile["name"]} class="w-16 rounded-full" />
+          <div class="pl-4">
             <div>
-              <h2 class="font-bold"><%= @profile["name"] %></h2>
-              <span class="my-2 flex block text-xs" data-role="profile">
+              <h2 class="font-bold text-[#2B3442] dark:text-[#FFFFFF]"><%= @profile["name"] %></h2>
+              <span class="text-xs text-[#0079FF]" data-role="profile">
                 @<%= @profile["login"] %>
               </span>
             </div>
-            <p class="text-sm"><%= "Joined  #{format_date(@profile["created_at"])}" %></p>
+            <p class="text-sm font-light text-[#697C9A] dark:text-[#FFFFFF]"><%= "Joined  #{format_date(@profile["created_at"])}" %></p>
           </div>
-          <p class="my-4 text-xs"><%= @profile["bio"] %></p>
+        </div>
+        <div class="">
+          <p class="py-5 text-xs text-[#4B6A9B] dark:text-[#FFFFFF]"><%= @profile["bio"] %></p>
 
-          <div class="flex justify-between bg-[#141D2F] rounded-lg my-8 px-6 py-2">
+          <div class="flex space-x-6 items-center  bg-[#F6F8FF] dark:bg-[#141D2F] rounded-lg p-5 md:space-x-24">
             <CustomComponent.stats
               :for={
                 {stats_description, stats} <- [
@@ -64,28 +63,28 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
               stats={stats}
             />
           </div>
-          <div class="grid grid-cols-2 text-xs">
+          <div class="grid-cols-2 pt-5 space-y-3 text-xs md:grid text-[#4B6A9B] dark:text-[#FFFFFF]">
             <div class="flex">
               <CustomComponent.location_icon />
-              <p class="ml-3 items-center"><%= @profile["location"] %></p>
+              <p class="items-center pl-3"><%= @profile["location"] %></p>
             </div>
-            <div class="flex  items-center justify-center">
+            <div class="flex items-center ">
               <CustomComponent.twitter_icon account_exist?={@profile["twitter_username"]} />
-              <p class="ml-2">
+              <p class="pl-3">
                 <%= if @profile["twitter_username"],
                   do: @profile["twitter_username"],
                   else: "not available" %>
               </p>
             </div>
-            <div class="flex my-4 items-center ">
+            <div class="flex items-center">
               <CustomComponent.link_icon />
-              <p class="ml-2">
+              <p class="pl-3">
                 <%= if @profile["blog"], do: @profile["blog"], else: "not available" %>
               </p>
             </div>
-            <div class="flex  my-4 items-center justify-center">
+            <div class="flex items-center">
               <CustomComponent.office_icon />
-              <p class="ml-2"><%= @profile["company"] %></p>
+              <p class="pl-3"><%= @profile["company"] %></p>
             </div>
           </div>
         </div>
@@ -94,10 +93,28 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
     """
   end
 
+  def mount(_params, _session, socket) do
+    profile = ProfileApi.data()
+
+    {
+      :ok,
+      socket
+      |> assign_user()
+      |> clear_form()
+      |> assign(profile: profile)
+      # |> assign_profile()
+    }
+  end
+
   def assign_user(socket) do
     socket
     |> assign(:user, %ProfileChangeset{})
   end
+
+  # def assign_profile(socket) do
+  #   {:ok, profile} = ProfileApi.get_profile("octocat")
+  #   assign(socket, :profile, profile)
+  # end
 
   def clear_form(socket) do
     form =
@@ -112,6 +129,11 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
     assign(socket, :form, to_form(changeset))
   end
 
+  def handle_event("toggle_theme", unsigned_params, socket) do
+    IO.inspect(unsigned_params)
+    {:noreply, socket}
+  end
+
   def handle_event("validate", %{"profile_changeset" => profile_changeset_params}, socket) do
     form =
       %ProfileChangeset{}
@@ -122,8 +144,11 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
     {:noreply, assign(socket, form: form)}
   end
 
-  def handle_event("search_dev", %{"profile_changeset" => username}, socket) do
-    {:noreply, assign(socket, :profile, ProfileApi.fetch(username["username"]))}
+  def handle_event("search_dev", %{"profile_changeset" => params}, socket) do
+    case ProfileApi.get_profile(params["username"]) do
+      {:ok, profile} -> {:noreply, assign(socket, :profile, profile)}
+      {:error, _reason} -> {:noreply, socket}
+    end
   end
 
   def format_date(date) do
@@ -134,5 +159,11 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
     |> DateTime.to_date()
     |> IO.inspect(label: "date")
     |> Timex.format!("{D} {Mshort} {YYYY}")
+  end
+
+  def toggle_dark_mode do
+    JS.dispatch("toggle-darkmode")
+    |> JS.toggle(to: "#dark-mode", display: "flex")
+    |> JS.toggle(to: "#light-mode", display: "flex")
   end
 end

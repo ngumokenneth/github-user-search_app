@@ -227,7 +227,7 @@ defmodule GithubUserSearchAppWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="space-y-8  mt-10 ">
+      <div class="w-full ">
         <%= render_slot(@inner_block, f) %>
         <div :for={action <- @actions} class="mt-2 flex items-center justify-between gap-6">
           <%= render_slot(action, f) %>
@@ -279,6 +279,12 @@ defmodule GithubUserSearchAppWeb.CoreComponents do
       <.input field={@form[:email]} type="email" />
       <.input name="my-input" errors={["oh no!"]} />
   """
+  attr :custom_class, :string,
+    default: "mt-2 block w-full h-16  rounded-lg border-zinc-300 py-[7px] px-[11px]
+  text-zinc-900 focus:outline-none focus:ring-4 sm:text-sm sm:leading-6
+  phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5
+  border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5"
+
   attr :id, :any, default: nil
   attr :name, :any
   attr :label, :string, default: nil
@@ -361,13 +367,14 @@ defmodule GithubUserSearchAppWeb.CoreComponents do
         id={@id || @name}
         name={@name}
         class={[
-          "mt-2 block min-h-[6rem] w-full rounded-lg border-zinc-300 py-[7px] px-[11px]",
+          "mt-2 block min-h-[6rem] w-full rounded-lg border-zinc-300gap-6 py-[7px] px-[11px] ",
           "text-zinc-900 focus:border-zinc-400 focus:outline-none focus:ring-4 focus:ring-zinc-800/5 sm:text-sm sm:leading-6",
           "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
           "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
           @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
         ]}
         {@rest}
+        gap-6
       ><%= Phoenix.HTML.Form.normalize_value("textarea", @value) %></textarea>
       <.error :for={msg <- @errors}><%= msg %></.error>
     </div>
@@ -384,10 +391,7 @@ defmodule GithubUserSearchAppWeb.CoreComponents do
         id={@id || @name}
         value={Phoenix.HTML.Form.normalize_value(@type, @value)}
         class={[
-          "mt-2 block w-full rounded-lg border-zinc-300 py-[7px] px-[11px]",
-          "text-zinc-900 focus:outline-none focus:ring-4 sm:text-sm sm:leading-6",
-          "phx-no-feedback:border-zinc-300 phx-no-feedback:focus:border-zinc-400 phx-no-feedback:focus:ring-zinc-800/5",
-          "border-zinc-300 focus:border-zinc-400 focus:ring-zinc-800/5",
+          @custom_class,
           @errors != [] && "border-rose-400 focus:border-rose-400 focus:ring-rose-400/10"
         ]}
         {@rest}

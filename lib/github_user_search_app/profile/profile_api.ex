@@ -1,24 +1,41 @@
 defmodule GithubUserSearchApp.Profile.ProfileApi do
-  def fetch(username) do
-    response = Finch.build(:get, "https://api.github.com/users/#{username}")
+  @behaviour GithubUserSearchApp.Profile.Client
 
-    case Finch.request(response, GithubUserSearchApp.Finch) do
-      {:ok, %Finch.Response{status: 200, body: body}} ->
-        handle_response(body, 200)
+  require Logger
 
-      {:ok, %Finch.Response{status: status, body: body}} ->
-        handle_response(body, status)
+  @url "https://api.github.com/users/"
 
-      {:error, reason} ->
-        IO.inspect(reason, label: "request error")
-    end
+  @impl GithubUserSearchApp.Profile.Client
+  def get_profile(username) do
+    username
+    |> fetch()
+    |> handle_response()
   end
 
-  def handle_response(body, status) do
-    case Jason.decode(body) do
-      {:ok, user} when status == 200 -> user
-      {:error, user_error} -> IO.puts(user_error["message"])
-    end
+  defp fetch(username) do
+    :get
+    |> Finch.build(@url <> username)
+    |> Finch.request(GithubUserSearchApp.Finch)
+  end
+
+  defp handle_response({:ok, %Finch.Response{body: body, status: 200}}) do
+    response = Jason.decode!(body)
+
+    {:ok, response}
+  end
+
+  defp handle_response({:ok, %Finch.Response{status: 404}}) do
+    {:ok, "Not found"}
+  end
+
+  defp handle_response({:ok, %Finch.Response{body: body, status: status}}) do
+    Logger.error("Github API error: #{inspect(body)} #{status}")
+    {:error, "Github API error"}
+  end
+
+  defp handle_response({:error, reason}) do
+    Logger.error(reason)
+    {:error, reason}
   end
 
   def data do
