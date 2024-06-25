@@ -10,7 +10,7 @@ defmodule GithubUserSearchApp.Profile.ProfileChangeset do
     |> validate_required([:username])
   end
 
-  def change_user(%__MODULE__{} = user, attrs \\ %{}) do
+  def change_user(user \\ %__MODULE__{}, attrs \\ %{}) do
     ProfileChangeset.validate_username(user, attrs)
   end
 end

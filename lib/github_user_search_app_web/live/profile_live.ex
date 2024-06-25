@@ -1,5 +1,6 @@
 defmodule GithubUserSearchAppWeb.ProfileLive do
   use GithubUserSearchAppWeb, :live_view
+
   alias GithubUserSearchApp.Profile.ProfileApi
   alias GithubUserSearchAppWeb.CustomComponent
   alias GithubUserSearchApp.Profile.ProfileChangeset
@@ -44,7 +45,9 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
                 @<%= @profile["login"] %>
               </span>
             </div>
-            <p class="text-sm font-light text-[#697C9A] dark:text-[#FFFFFF]"><%= "Joined  #{format_date(@profile["created_at"])}" %></p>
+            <p class="text-sm font-light text-[#697C9A] dark:text-[#FFFFFF]">
+              <%= "Joined  #{format_date(@profile["created_at"])}" %>
+            </p>
           </div>
         </div>
         <div class="">
@@ -71,15 +74,15 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
             <div class="flex items-center ">
               <CustomComponent.twitter_icon account_exist?={@profile["twitter_username"]} />
               <p class="pl-3">
-                <%= if @profile["twitter_username"],
+                <%= if(@profile["twitter_username"],
                   do: @profile["twitter_username"],
-                  else: "not available" %>
+                  else: "not available") %>
               </p>
             </div>
             <div class="flex items-center">
               <CustomComponent.link_icon />
               <p class="pl-3">
-                <%= if @profile["blog"], do: @profile["blog"], else: "not available" %>
+                <%= if(@profile["blog"], do: @profile["blog"], else: "not available") %>
               </p>
             </div>
             <div class="flex items-center">
@@ -94,32 +97,26 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
   end
 
   def mount(_params, _session, socket) do
-    profile = ProfileApi.data()
+    # profile = ProfileApi.data()
 
     {
       :ok,
       socket
       |> assign_user()
-      |> clear_form()
-      |> assign(profile: profile)
-      # |> assign_profile()
+      # |> assign(profile: profile)
+      |> assign_profile()
     }
   end
 
-  def assign_user(socket) do
-    socket
-    |> assign(:user, %ProfileChangeset{})
+  def assign_profile(socket) do
+    {:ok, profile} = ProfileApi.get_profile("octocat")
+    IO.inspect(profile)
+    assign(socket, :profile, profile)
   end
 
-  # def assign_profile(socket) do
-  #   {:ok, profile} = ProfileApi.get_profile("octocat")
-  #   assign(socket, :profile, profile)
-  # end
-
-  def clear_form(socket) do
+  def assign_user(socket) do
     form =
-      socket.assigns.user
-      |> ProfileChangeset.change_user()
+      ProfileChangeset.change_user()
       |> to_form()
 
     assign(socket, :form, form)
@@ -129,8 +126,7 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
     assign(socket, :form, to_form(changeset))
   end
 
-  def handle_event("toggle_theme", unsigned_params, socket) do
-    IO.inspect(unsigned_params)
+  def handle_event("toggle_theme", _unsigned_params, socket) do
     {:noreply, socket}
   end
 
@@ -153,11 +149,9 @@ defmodule GithubUserSearchAppWeb.ProfileLive do
 
   def format_date(date) do
     {:ok, date, _} = DateTime.from_iso8601(date)
-    IO.inspect(date)
 
     date
     |> DateTime.to_date()
-    |> IO.inspect(label: "date")
     |> Timex.format!("{D} {Mshort} {YYYY}")
   end
 
